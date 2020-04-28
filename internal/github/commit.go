@@ -8,7 +8,7 @@ import (
 	"golang.org/x/oauth2"
 )
 
-func CreateCommit(commitMessage string, path string, content []byte) {
+func CreateCommit(commitMessage string, path string, content []byte) (fileURL *string) {
 	ctx := context.Background()
 
 	ts := oauth2.StaticTokenSource(&oauth2.Token{AccessToken: Token})
@@ -21,9 +21,11 @@ func CreateCommit(commitMessage string, path string, content []byte) {
 		Branch:    github.String(CommitBranch),
 		Committer: &github.CommitAuthor{Name: github.String(AuthorName), Email: github.String(AuthorEmail)},
 	}
-	_, _, err := client.Repositories.CreateFile(ctx, SourceOwner, SourceRepo, path, opts)
+	res, _, err := client.Repositories.CreateFile(ctx, SourceOwner, SourceRepo, path, opts)
 	if err != nil {
 		fmt.Println(err)
-		return
+		return nil
 	}
+
+	return res.Content.HTMLURL
 }

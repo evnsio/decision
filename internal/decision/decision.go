@@ -19,7 +19,7 @@ var (
 	categoryLock    sync.Mutex
 )
 
-func OpenDecisionModal(triggerID string) {
+func OpenDecisionModal(triggerID string, triggerChannel string) {
 	titleLabel := slack.NewTextBlockObject(slack.PlainTextType, "Title", false, false)
 	titlePlaceholderText := slack.NewTextBlockObject(slack.PlainTextType, "Give this decision a tl;dr title", false, false)
 	titleInput := slack.NewPlainTextInputBlockElement(titlePlaceholderText, TitleInputID)
@@ -50,11 +50,12 @@ func OpenDecisionModal(triggerID string) {
 	consequencesSection := slack.NewInputBlock(ConsequencesBlockID, consequencesLabel, consequencesInput)
 
 	view := slack.ModalViewRequest{
-		CallbackID: LogDecisionCallbackID,
-		Type:       slack.ViewType("modal"),
-		Title:      slack.NewTextBlockObject(slack.PlainTextType, "Decision", false, false),
-		Close:      slack.NewTextBlockObject(slack.PlainTextType, "Cancel", false, false),
-		Submit:     slack.NewTextBlockObject(slack.PlainTextType, "Log Decision", false, false),
+		CallbackID:      LogDecisionCallbackID,
+		Type:            slack.ViewType("modal"),
+		Title:           slack.NewTextBlockObject(slack.PlainTextType, "Decision", false, false),
+		Close:           slack.NewTextBlockObject(slack.PlainTextType, "Cancel", false, false),
+		Submit:          slack.NewTextBlockObject(slack.PlainTextType, "Log Decision", false, false),
+		PrivateMetadata: triggerChannel,
 		Blocks: slack.Blocks{
 			BlockSet: []slack.Block{
 				titleSection,
@@ -121,7 +122,6 @@ func GetCategoryOptions(typeAheadValue *string) slack.OptionsResponse {
 }
 
 func HandleModalSubmission(payload slack.InteractionCallback) {
-
 	submissionValues := payload.View.State.Values
 
 	title := submissionValues[TitleBlockID][TitleInputID].Value
@@ -160,9 +160,20 @@ func HandleModalSubmission(payload slack.InteractionCallback) {
 		return
 	}
 
+	// Create the commit
 	fileName := category + "/" + slug.Make(title) + ".md"
 	commitMessage := title
 	content := decisionBytes.Bytes()
+	fileURL := github.CreateCommit(commitMessage, fileName, content)
 
-	github.CreateCommit(commitMessage, fileName, content)
+	// Return an ephemeral message to the user
+	msgOption := slack.MsgOptionText("✅ Your decision \""+title+"\" has been saved <"+*fileURL+"|here>.", false)
+
+	api := slack.New(Token)
+	_, err = api.PostEphemeral(payload.View.PrivateMetadata, payload.User.ID, msgOption)
+	if err != nil {
+		fmt.Printf("Failed to send message: %v (%v, %v)\n", err, payload.View.PrivateMetadata, payload.User.ID)
+		return
+	}
+
 }

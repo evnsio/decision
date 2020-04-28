@@ -46,7 +46,7 @@ func handleSlash(w http.ResponseWriter, r *http.Request) {
 
 	switch s.Command {
 	case decision.SlashCommand:
-		decision.OpenDecisionModal(s.TriggerID)
+		decision.OpenDecisionModal(s.TriggerID, s.ChannelID)
 	default:
 		fmt.Printf("%v -- %v", s.Command, s.Text)
 		w.WriteHeader(http.StatusInternalServerError)
