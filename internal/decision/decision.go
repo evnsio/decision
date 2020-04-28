@@ -121,8 +121,10 @@ func GetCategoryOptions(typeAheadValue *string) slack.OptionsResponse {
 	return response
 }
 
-func HandleModalSubmission(payload slack.InteractionCallback) {
+func HandleModalSubmission(payload *slack.InteractionCallback) {
 	submissionValues := payload.View.State.Values
+
+	sourceChannel := payload.View.PrivateMetadata
 
 	title := submissionValues[TitleBlockID][TitleInputID].Value
 	category := submissionValues[CategoryBlockID][CategorySelectID].SelectedOption.Value
@@ -160,20 +162,34 @@ func HandleModalSubmission(payload slack.InteractionCallback) {
 		return
 	}
 
-	// Create the commit
 	fileName := category + "/" + slug.Make(title) + ".md"
 	commitMessage := title
 	content := decisionBytes.Bytes()
-	fileURL := github.CreateCommit(commitMessage, fileName, content)
 
+	if CommitAsPRs {
+		prURL := github.RaisePullRequest(slug.Make(title), commitMessage, fileName, content)
+
+		if prURL != nil {
+			message := "✅ A pull request for \"" + title + "\" has been created <" + *prURL + "|here>."
+			sendDecisionLinkToUser(message, title, *prURL, sourceChannel, payload.User.ID)
+		}
+	} else {
+		decisionURL := github.CreateCommit(commitMessage, fileName, content)
+
+		if decisionURL != nil {
+			message := "✅ Your decision \"" + title + "\" has been committed <" + *decisionURL + "|here>."
+			sendDecisionLinkToUser(message, title, *decisionURL, sourceChannel, payload.User.ID)
+		}
+	}
+}
+
+func sendDecisionLinkToUser(message string, title string, fileURL string, channel string, user string) {
 	// Return an ephemeral message to the user
-	msgOption := slack.MsgOptionText("✅ Your decision \""+title+"\" has been saved <"+*fileURL+"|here>.", false)
-
+	msgOption := slack.MsgOptionText(message, false)
 	api := slack.New(Token)
-	_, err = api.PostEphemeral(payload.View.PrivateMetadata, payload.User.ID, msgOption)
+	_, err := api.PostEphemeral(channel, user, msgOption)
 	if err != nil {
-		fmt.Printf("Failed to send message: %v (%v, %v)\n", err, payload.View.PrivateMetadata, payload.User.ID)
+		fmt.Printf("Failed to send message: %v (%v, %v)\n", err, channel, user)
 		return
 	}
-
 }

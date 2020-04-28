@@ -1,7 +1,8 @@
 package decision
 
 var (
-	Token string
+	Token       string
+	CommitAsPRs bool
 )
 
 const (

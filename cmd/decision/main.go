@@ -63,7 +63,7 @@ func handleActions(w http.ResponseWriter, r *http.Request) {
 
 	if payload.Type == slack.InteractionTypeViewSubmission {
 		if payload.View.CallbackID == decision.LogDecisionCallbackID {
-			decision.HandleModalSubmission(payload)
+			go decision.HandleModalSubmission(&payload)
 		}
 	}
 }
@@ -98,6 +98,7 @@ func handleOptions(w http.ResponseWriter, r *http.Request) {
 }
 
 func parseFlags() {
+	flag.BoolVar(&decision.CommitAsPRs, "commit-as-prs", false, "Commit decisions as Pull Requests")
 	flag.StringVar(&decision.Token, "slack-token", "", "Your Slack API token starting xoxb-...")
 	flag.StringVar(&github.Token, "github-token", "", "Your GitHub access token")
 	flag.StringVar(&github.SourceOwner, "source-owner", "", "The owner of your repo where decisions will be committed")
