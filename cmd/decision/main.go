@@ -101,7 +101,7 @@ func parseFlags() {
 	flag.BoolVar(&decision.CommitAsPRs, "commit-as-prs", false, "Commit decisions as Pull Requests")
 	flag.StringVar(&decision.Token, "slack-token", "", "Your Slack API token starting xoxb-...")
 	flag.StringVar(&github.Token, "github-token", "", "Your GitHub access token")
-	flag.StringVar(&github.SourceOwner, "source-owner", "", "The owner of your repo where decisions will be committed")
+	flag.StringVar(&github.SourceOwner, "source-owner", "", "The owner / organisation of the repo where decisions will be committed")
 	flag.StringVar(&github.SourceRepo, "source-repo", "", "The repo where decisions will be committed")
 	flag.StringVar(&github.CommitBranch, "branch", "master", "The branch where decisions will be committed")
 	flag.StringVar(&github.AuthorName, "commit-author", "", "The author name to use for commits")
