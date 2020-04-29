@@ -1,6 +1,6 @@
 # Decision
 
-<img style="width: 100px;" src="./docs/decision.png"  alt="decision"/>
+<img width="100" src="./docs/decision.png"  alt="decision"/>
 
 A Slack integration for logging decisions in Git.
 
@@ -8,35 +8,35 @@ A Slack integration for logging decisions in Git.
 
 ## How does it work?
 
-### 1️⃣ Log a decision in Slack with `/decision` 
+- 1️⃣ Log a decision in Slack with `/decision` 
 
-### 2️⃣ Fill out the dialog
+- 2️⃣ Fill out the dialog
 
-<img style="width: 400px;" src="./docs/populated-modal.png"  alt="decision"/>
+    <img width="400" src="./docs/populated-modal.png"  alt="decision"/>
 
-### 3️⃣ Log the decision 
+- 3️⃣ Log the decision 
 
-Depending on your configuration, this will either:
+    Depending on your configuration, this will either:
 
-- Commit the decision direct to your decisions repo
+    - Commit the decision direct to your decisions repo
 
-    <img style="width: 400px;" src="./docs/commit-to-master-message.png"  alt="decision"/>
+        <img width="400" src="./docs/commit-to-master-message.png"  alt="decision"/>
 
-or
+    or
 
-- Create a PR for review.
+    - Create a PR for review.
 
-    <img style="width: 400px;" src="./docs/create-pr-message.png"  alt="decision"/>
+        <img width="400" src="./docs/create-pr-message.png"  alt="decision"/>
     
-    👇
+        👇
 
-    <img style="width: 400px;" src="./docs/pr.png"  alt="decision"/>
+        <img width="400" src="./docs/pr.png"  alt="decision"/>
 
-### 4️⃣ See you decision in Git
+-  4️⃣ See you decision in Git
 
-After the committing directly, or merging the PR, your decision is logged in the coorect category folder in your repo.
+    After committing directly, or merging the PR, your decision is logged in the correct category folder in your repo.
 
-<img style="width: 400px;" src="./docs/decision-record.png"  alt="decision"/>
+    <img width="400" src="./docs/decision-record.png"  alt="decision"/>
 
 ---
 
