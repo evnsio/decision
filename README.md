@@ -87,3 +87,22 @@ docker run -p 8000:8000 decision
 
 ## Setup and usage
 
+1. Navigate to [https://api.slack.com/apps](https://api.slack.com/apps) and select 'Create New App'.  You can call your app whatever you like, for example 'Decision'.
+
+1. Click `Slash Commands` > `Create New Command` and enter the following:
+
+    - Command: `/decision`
+    - Request URL: `https://<your-domain>/slash`
+    - Short description: `Log a decision!`
+
+1. Click `OAuth & Permissions` and navigte to `Bot Token Scopes`.  Add the following:
+
+    - `chat:write`
+    - `chat:write.public`
+
+1. Still in `OAuth & Permissions` click `Install App to Workspace`.  You'll be taken through the OAuth flow, and then return to the main screen where your bot token can be found. It's the one that starts with `xoxb-...`.  
+
+1. Click `Interactivity & Shortcuts`, toggle on Interactivity, and add the following:
+
+    - Request URL: `https://<your-domain>/action`
+    - Options URL: `https://<your-domain>/options`

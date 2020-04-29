@@ -17,11 +17,7 @@ import (
 )
 
 var (
-	gitRepo string
-)
-
-const (
-	signingSecret = "f2bf0a5c269b3ac64e304022e8b34162"
+	signingSecret string
 )
 
 func handleSlash(w http.ResponseWriter, r *http.Request) {
@@ -100,6 +96,7 @@ func handleOptions(w http.ResponseWriter, r *http.Request) {
 func parseFlags() {
 	flag.BoolVar(&decision.CommitAsPRs, "commit-as-prs", false, "Commit decisions as Pull Requests")
 	flag.StringVar(&decision.Token, "slack-token", "", "Your Slack API token starting xoxb-...")
+	flag.StringVar(&signingSecret, "slack-signing-secret", "", "Your Slack signing secret")
 	flag.StringVar(&github.Token, "github-token", "", "Your GitHub access token")
 	flag.StringVar(&github.SourceOwner, "source-owner", "", "The owner / organisation of the repo where decisions will be committed")
 	flag.StringVar(&github.SourceRepo, "source-repo", "", "The repo where decisions will be committed")
@@ -115,6 +112,11 @@ func parseFlags() {
 
 	if !strings.HasPrefix(decision.Token, "xoxb") {
 		fmt.Fprintln(os.Stderr, "-slack-token should be a bot token starting 'xoxb-'")
+		os.Exit(2)
+	}
+
+	if signingSecret == "" {
+		fmt.Fprintln(os.Stderr, "missing required argument -slack-signing-secret")
 		os.Exit(2)
 	}
 
