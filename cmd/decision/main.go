@@ -2,13 +2,14 @@ package main
 
 import (
 	"encoding/json"
-	"flag"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"os"
 	"strings"
+
+	"github.com/namsral/flag"
 
 	"github.com/evnsio/decision/internal/decision"
 	"github.com/evnsio/decision/internal/github"
@@ -93,7 +94,17 @@ func handleOptions(w http.ResponseWriter, r *http.Request) {
 
 }
 
+func redact(thing string) string {
+	if len(thing) < 3 {
+		return thing
+	} else {
+		return thing[0:3] + strings.Repeat(".", len(thing)-3)
+	}
+}
+
 func parseFlags() {
+	var dotEnvFile string
+	flag.StringVar(&dotEnvFile, "env-file", "", ".env file to use")
 	flag.BoolVar(&decision.CommitAsPRs, "commit-as-prs", false, "Commit decisions as Pull Requests")
 	flag.StringVar(&decision.Token, "slack-token", "", "Your Slack API token starting xoxb-...")
 	flag.StringVar(&signingSecret, "slack-signing-secret", "", "Your Slack signing secret")
@@ -108,6 +119,8 @@ func parseFlags() {
 	if decision.Token == "" {
 		fmt.Fprintln(os.Stderr, "missing required argument -slack-token")
 		os.Exit(2)
+	} else {
+		fmt.Printf("Slack Token: %v\n", redact(decision.Token))
 	}
 
 	if !strings.HasPrefix(decision.Token, "xoxb") {
@@ -118,31 +131,43 @@ func parseFlags() {
 	if signingSecret == "" {
 		fmt.Fprintln(os.Stderr, "missing required argument -slack-signing-secret")
 		os.Exit(2)
+	} else {
+		fmt.Printf("Slack Signing Secret: %v\n", redact(signingSecret))
 	}
 
 	if github.Token == "" {
 		fmt.Fprintln(os.Stderr, "missing required argument -github-token")
 		os.Exit(2)
+	} else {
+		fmt.Printf("Github Token: %v\n", redact(github.Token))
 	}
 
 	if github.SourceOwner == "" {
 		fmt.Fprintln(os.Stderr, "missing required argument -source-owner")
 		os.Exit(2)
+	} else {
+		fmt.Printf("Source Owner: %v\n", redact(github.SourceOwner))
 	}
 
 	if github.SourceRepo == "" {
 		fmt.Fprintln(os.Stderr, "missing required argument -source-repo")
 		os.Exit(2)
+	} else {
+		fmt.Printf("Source Repo: %v\n", redact(github.SourceRepo))
 	}
 
 	if github.AuthorName == "" {
 		fmt.Fprintln(os.Stderr, "missing required argument -commit-author")
 		os.Exit(2)
+	} else {
+		fmt.Printf("Commit Author: %v\n", redact(github.AuthorName))
 	}
 
 	if github.AuthorEmail == "" {
 		fmt.Fprintln(os.Stderr, "missing required argument -commit-email")
 		os.Exit(2)
+	} else {
+		fmt.Printf("Commit Email: %v\n", redact(github.AuthorEmail))
 	}
 }
 
