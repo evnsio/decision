@@ -103,8 +103,6 @@ func redact(thing string) string {
 }
 
 func parseFlags() {
-	var dotEnvFile string
-	flag.StringVar(&dotEnvFile, "env-file", "", ".env file to use")
 	flag.BoolVar(&decision.CommitAsPRs, "commit-as-prs", false, "Commit decisions as Pull Requests")
 	flag.StringVar(&decision.Token, "slack-token", "", "Your Slack API token starting xoxb-...")
 	flag.StringVar(&signingSecret, "slack-signing-secret", "", "Your Slack signing secret")
