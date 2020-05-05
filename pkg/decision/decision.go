@@ -8,7 +8,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/evnsio/decision/internal/github"
+	"github.com/evnsio/decision/pkg/github"
 	"github.com/gosimple/slug"
 
 	"github.com/slack-go/slack"

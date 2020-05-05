@@ -11,8 +11,8 @@ import (
 
 	"github.com/namsral/flag"
 
-	"github.com/evnsio/decision/internal/decision"
-	"github.com/evnsio/decision/internal/github"
+	"github.com/evnsio/decision/pkg/decision"
+	"github.com/evnsio/decision/pkg/github"
 
 	"github.com/slack-go/slack"
 )
