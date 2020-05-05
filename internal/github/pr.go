@@ -33,9 +33,9 @@ func getRef(commitBranch string) (ref *github.Reference, err error) {
 // getTree generates the tree to commit based on the given files and the commit
 // of the ref you got in getRef.
 func getTree(path string, content []byte, ref *github.Reference) (tree *github.Tree, err error) {
-	entries := []*github.TreeEntry{}
+	entries := []github.TreeEntry{}
 
-	entries = append(entries, &github.TreeEntry{
+	entries = append(entries, github.TreeEntry{
 		Path:    github.String(path),
 		Type:    github.String("blob"),
 		Content: github.String(string(content)),
@@ -60,7 +60,7 @@ func createCommit(commitMessage string, ref *github.Reference, tree *github.Tree
 	// Create the commit using the tree.
 	date := time.Now()
 	author := &github.CommitAuthor{Date: &date, Name: &AuthorName, Email: &AuthorEmail}
-	commit := &github.Commit{Author: author, Message: &commitMessage, Tree: tree, Parents: []*github.Commit{parent.Commit}}
+	commit := &github.Commit{Author: author, Message: &commitMessage, Tree: tree, Parents: []github.Commit{*parent.Commit}}
 	newCommit, _, err := client.Git.CreateCommit(ctx, SourceOwner, SourceRepo, commit)
 	if err != nil {
 		return err
