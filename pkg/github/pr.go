@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/evnsio/decision/pkg/decision"
 	"github.com/evnsio/decision/pkg/git"
 	"github.com/google/go-github/github"
 	"log"
@@ -34,17 +35,17 @@ func (p *Provider) RaisePullRequest(branch string, commitMessage string, path st
 }
 
 func (p *Provider) createPR(prSubject string, branch string) (url string, err error) {
-	prBody := "Logging decision for \"" + prSubject + "\""
+	prBody := decision.PullRequestBody(prSubject)
 
 	newPR := &github.NewPullRequest{
 		Title:               &prSubject,
 		Head:                &branch,
-		Base:                &CommitBranch,
+		Base:                &git.CommitHeadBranch,
 		Body:                &prBody,
 		MaintainerCanModify: github.Bool(true),
 	}
 
-	pr, _, err := p.client.PullRequests.Create(context.Background(), SourceOwner, SourceRepo, newPR)
+	pr, _, err := p.client.PullRequests.Create(context.Background(), git.SourceOwner, git.SourceRepo, newPR)
 	if err != nil {
 		return "", err
 	}

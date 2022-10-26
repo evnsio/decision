@@ -4,13 +4,11 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/evnsio/decision/pkg/git"
-	"github.com/evnsio/decision/pkg/gitlab"
 	"html/template"
 	"strings"
 	"sync"
 	"time"
 
-	"github.com/evnsio/decision/pkg/github"
 	"github.com/gosimple/slug"
 
 	"github.com/slack-go/slack"
@@ -85,11 +83,14 @@ func GetCategoryOptions(typeAheadValue *string) slack.OptionsResponse {
 		defer categoryLock.Unlock()
 
 		categoryOptions = make([]*slack.OptionBlockObject, 0)
-		existingFolders, _ := github.GetFolders()
+		existingFolders, _ := git.GetProvider().GetFolders()
+
+		//existingFolders, _ := github.GetFolders()
+		//existingFolders, _ := github.GetFolders()
 		for _, folder := range existingFolders {
 			categoryOptions = append(categoryOptions, slack.NewOptionBlockObject(
-				strings.ToLower(*folder),
-				slack.NewTextBlockObject(slack.PlainTextType, *folder, false, false)))
+				strings.ToLower(folder),
+				slack.NewTextBlockObject(slack.PlainTextType, folder, false, false)))
 		}
 	}
 
@@ -169,13 +170,7 @@ func HandleModalSubmission(payload *slack.InteractionCallback) {
 	commitMessage := title
 	content := decisionBytes.Bytes()
 
-	var provider git.Provider
-	switch git.ProviderType {
-	case "github":
-		provider = github.NewProvider(git.Token)
-	case "gitlab":
-		provider = gitlab.NewProvider(git.Token)
-	}
+	provider := git.GetProvider()
 
 	if CommitAsPRs {
 		prURL, err := provider.RaisePullRequest(slug.Make(title), commitMessage, fileName, content)

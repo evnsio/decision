@@ -11,7 +11,7 @@ type Provider struct {
 }
 
 func NewProvider(accessToken string) *Provider {
-	ts := oauth2.StaticTokenSource(&oauth2.Token{AccessToken: Token})
+	ts := oauth2.StaticTokenSource(&oauth2.Token{AccessToken: accessToken})
 	tc := oauth2.NewClient(context.Background(), ts)
 
 	return &Provider{
