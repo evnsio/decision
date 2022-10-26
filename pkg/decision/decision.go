@@ -3,6 +3,8 @@ package decision
 import (
 	"bytes"
 	"fmt"
+	"github.com/evnsio/decision/pkg/git"
+	"github.com/evnsio/decision/pkg/gitlab"
 	"html/template"
 	"strings"
 	"sync"
@@ -167,20 +169,31 @@ func HandleModalSubmission(payload *slack.InteractionCallback) {
 	commitMessage := title
 	content := decisionBytes.Bytes()
 
+	var provider git.Provider
+	switch git.ProviderType {
+	case "github":
+		provider = github.NewProvider(git.Token)
+	case "gitlab":
+		provider = gitlab.NewProvider(git.Token)
+	}
+
 	if CommitAsPRs {
-		prURL := github.RaisePullRequest(slug.Make(title), commitMessage, fileName, content)
-
-		if prURL != nil {
-			message := "✅ A pull request for \"" + title + "\" has been created <" + *prURL + "|here>."
-			sendDecisionLinkToUser(message, title, *prURL, sourceChannel, payload.User.ID)
+		prURL, err := provider.RaisePullRequest(slug.Make(title), commitMessage, fileName, content)
+		if err != nil {
+			return
 		}
+
+		message := "✅ A pull request for \"" + title + "\" has been created <" + prURL + "|here>."
+		sendDecisionLinkToUser(message, title, prURL, sourceChannel, payload.User.ID)
 	} else {
-		decisionURL := github.CreateCommit(commitMessage, fileName, content)
+		decisionURL, err := provider.CreateCommit(commitMessage, fileName, content)
 
-		if decisionURL != nil {
-			message := "✅ Your decision \"" + title + "\" has been committed <" + *decisionURL + "|here>."
-			sendDecisionLinkToUser(message, title, *decisionURL, sourceChannel, payload.User.ID)
+		if err != nil {
+			return
 		}
+
+		message := "✅ Your decision \"" + title + "\" has been committed <" + decisionURL + "|here>."
+		sendDecisionLinkToUser(message, title, decisionURL, sourceChannel, payload.User.ID)
 	}
 }
 
