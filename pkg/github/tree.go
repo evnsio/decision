@@ -10,7 +10,7 @@ func (p *Provider) GetFolders() ([]string, error) {
 	tree, _, err := p.client.Git.GetTree(context.Background(), git.SourceOwner, git.SourceRepo, "refs/heads/master", false)
 	if err != nil {
 		fmt.Printf("Error getting tree: %s", err)
-		return nil, err
+		return nil, nil
 	}
 
 	folders := make([]string, 0)

@@ -3,7 +3,7 @@ package decision
 import (
 	"bytes"
 	"fmt"
-	"github.com/evnsio/decision/pkg/git"
+	"github.com/evnsio/decision/pkg/provider"
 	"html/template"
 	"strings"
 	"sync"
@@ -83,7 +83,7 @@ func GetCategoryOptions(typeAheadValue *string) slack.OptionsResponse {
 		defer categoryLock.Unlock()
 
 		categoryOptions = make([]*slack.OptionBlockObject, 0)
-		existingFolders, _ := git.GetProvider().GetFolders()
+		existingFolders, _ := provider.GetProvider().GetFolders()
 
 		//existingFolders, _ := github.GetFolders()
 		//existingFolders, _ := github.GetFolders()
@@ -170,7 +170,7 @@ func HandleModalSubmission(payload *slack.InteractionCallback) {
 	commitMessage := title
 	content := decisionBytes.Bytes()
 
-	provider := git.GetProvider()
+	provider := provider.GetProvider()
 
 	if CommitAsPRs {
 		prURL, err := provider.RaisePullRequest(slug.Make(title), commitMessage, fileName, content)

@@ -1,4 +1,4 @@
-package decision
+package git
 
 import "fmt"
 

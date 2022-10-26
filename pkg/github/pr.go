@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/evnsio/decision/pkg/decision"
 	"github.com/evnsio/decision/pkg/git"
 	"github.com/google/go-github/github"
 	"log"
@@ -35,7 +34,7 @@ func (p *Provider) RaisePullRequest(branch string, commitMessage string, path st
 }
 
 func (p *Provider) createPR(prSubject string, branch string) (url string, err error) {
-	prBody := decision.PullRequestBody(prSubject)
+	prBody := git.PullRequestBody(prSubject)
 
 	newPR := &github.NewPullRequest{
 		Title:               &prSubject,

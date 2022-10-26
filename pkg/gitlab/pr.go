@@ -1,7 +1,7 @@
 package gitlab
 
 import (
-	"github.com/evnsio/decision/pkg/decision"
+	"fmt"
 	"github.com/evnsio/decision/pkg/git"
 	"github.com/xanzy/go-gitlab"
 )
@@ -15,7 +15,7 @@ func (p *Provider) RaisePullRequest(branch string, commitMessage string, path st
 
 	removeBranch := true
 	squash := true
-	description := decision.PullRequestBody(commitMessage)
+	description := git.PullRequestBody(commitMessage)
 	mr, _, err := p.client.MergeRequests.CreateMergeRequest(repositoryId(), &gitlab.CreateMergeRequestOptions{
 		Title:              &commitMessage,
 		Description:        &description,
@@ -26,6 +26,7 @@ func (p *Provider) RaisePullRequest(branch string, commitMessage string, path st
 	})
 
 	if err != nil {
+		fmt.Printf("Error opening MR: %s", err)
 		return "", err
 	}
 

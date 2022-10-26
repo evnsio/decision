@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/evnsio/decision/pkg/git"
 	"github.com/xanzy/go-gitlab"
-	"net/url"
 )
 
 func (p *Provider) CreateCommit(commitMessage string, path string, content []byte) (string, error) {
@@ -32,6 +31,7 @@ func (p *Provider) createCommitOnBranch(commitMessage, path, content, branch str
 	)
 
 	if err != nil {
+		fmt.Printf("Error creating commit: %s", err)
 		return "", err
 	}
 
@@ -39,5 +39,5 @@ func (p *Provider) createCommitOnBranch(commitMessage, path, content, branch str
 }
 
 func repositoryId() string {
-	return url.QueryEscape(fmt.Sprintf("%s/%s", git.SourceOwner, git.SourceRepo))
+	return fmt.Sprintf("%s/%s", git.SourceOwner, git.SourceRepo)
 }

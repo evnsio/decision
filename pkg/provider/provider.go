@@ -1,6 +1,7 @@
-package git
+package provider
 
 import (
+	"github.com/evnsio/decision/pkg/git"
 	"github.com/evnsio/decision/pkg/github"
 	"github.com/evnsio/decision/pkg/gitlab"
 )
@@ -23,12 +24,11 @@ func GetProvider() Provider {
 		return provider
 	}
 
-	switch ProviderType {
+	switch git.ProviderType {
 	case "github":
-		provider = github.NewProvider(Token)
-		return provider
+		provider = github.NewProvider(git.Token)
 	case "gitlab":
-		provider = gitlab.NewProvider(Token)
+		provider = gitlab.NewProvider(git.Token)
 	}
 
 	return provider

@@ -1,6 +1,7 @@
 package gitlab
 
 import (
+	"fmt"
 	"github.com/evnsio/decision/pkg/git"
 	"github.com/xanzy/go-gitlab"
 )
@@ -16,6 +17,7 @@ func (p *Provider) GetFolders() ([]string, error) {
 	})
 
 	if err != nil {
+		fmt.Printf("Error getting tree: %s", err)
 		return nil, err
 	}
 
