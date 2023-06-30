@@ -3,12 +3,12 @@ package decision
 import (
 	"bytes"
 	"fmt"
+	"github.com/evnsio/decision/pkg/provider"
 	"html/template"
 	"strings"
 	"sync"
 	"time"
 
-	"github.com/evnsio/decision/pkg/github"
 	"github.com/gosimple/slug"
 
 	"github.com/slack-go/slack"
@@ -83,11 +83,14 @@ func GetCategoryOptions(typeAheadValue *string) slack.OptionsResponse {
 		defer categoryLock.Unlock()
 
 		categoryOptions = make([]*slack.OptionBlockObject, 0)
-		existingFolders, _ := github.GetFolders()
+		existingFolders, _ := provider.GetProvider().GetFolders()
+
+		//existingFolders, _ := github.GetFolders()
+		//existingFolders, _ := github.GetFolders()
 		for _, folder := range existingFolders {
 			categoryOptions = append(categoryOptions, slack.NewOptionBlockObject(
-				strings.ToLower(*folder),
-				slack.NewTextBlockObject(slack.PlainTextType, *folder, false, false)))
+				strings.ToLower(folder),
+				slack.NewTextBlockObject(slack.PlainTextType, folder, false, false)))
 		}
 	}
 
@@ -167,20 +170,25 @@ func HandleModalSubmission(payload *slack.InteractionCallback) {
 	commitMessage := title
 	content := decisionBytes.Bytes()
 
+	provider := provider.GetProvider()
+
 	if CommitAsPRs {
-		prURL := github.RaisePullRequest(slug.Make(title), commitMessage, fileName, content)
-
-		if prURL != nil {
-			message := "✅ A pull request for \"" + title + "\" has been created <" + *prURL + "|here>."
-			sendDecisionLinkToUser(message, title, *prURL, sourceChannel, payload.User.ID)
+		prURL, err := provider.RaisePullRequest(slug.Make(title), commitMessage, fileName, content)
+		if err != nil {
+			return
 		}
+
+		message := "✅ A pull request for \"" + title + "\" has been created <" + prURL + "|here>."
+		sendDecisionLinkToUser(message, title, prURL, sourceChannel, payload.User.ID)
 	} else {
-		decisionURL := github.CreateCommit(commitMessage, fileName, content)
+		decisionURL, err := provider.CreateCommit(commitMessage, fileName, content)
 
-		if decisionURL != nil {
-			message := "✅ Your decision \"" + title + "\" has been committed <" + *decisionURL + "|here>."
-			sendDecisionLinkToUser(message, title, *decisionURL, sourceChannel, payload.User.ID)
+		if err != nil {
+			return
 		}
+
+		message := "✅ Your decision \"" + title + "\" has been committed <" + decisionURL + "|here>."
+		sendDecisionLinkToUser(message, title, decisionURL, sourceChannel, payload.User.ID)
 	}
 }
 

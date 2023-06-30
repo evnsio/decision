@@ -3,28 +3,20 @@ package github
 import (
 	"context"
 	"fmt"
-
-	"github.com/google/go-github/github"
-	"golang.org/x/oauth2"
+	"github.com/evnsio/decision/pkg/git"
 )
 
-func GetFolders() ([]*string, error) {
-	ctx := context.Background()
-
-	ts := oauth2.StaticTokenSource(&oauth2.Token{AccessToken: Token})
-	tc := oauth2.NewClient(ctx, ts)
-	client := github.NewClient(tc)
-
-	tree, _, err := client.Git.GetTree(ctx, SourceOwner, SourceRepo, "refs/heads/master", false)
+func (p *Provider) GetFolders() ([]string, error) {
+	tree, _, err := p.client.Git.GetTree(context.Background(), git.SourceOwner, git.SourceRepo, fmt.Sprintf("refs/heads/%s", git.CommitHeadBranch), false)
 	if err != nil {
 		fmt.Printf("Error getting tree: %s", err)
-		return nil, err
+		return nil, nil
 	}
 
-	folders := make([]*string, 0)
+	folders := make([]string, 0)
 	for _, entry := range tree.Entries {
 		if *entry.Type == "tree" {
-			folders = append(folders, entry.Path)
+			folders = append(folders, *entry.Path)
 		}
 	}
 

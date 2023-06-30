@@ -3,8 +3,8 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/evnsio/decision/pkg/git"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"strings"
@@ -12,8 +12,6 @@ import (
 	"github.com/namsral/flag"
 
 	"github.com/evnsio/decision/pkg/decision"
-	"github.com/evnsio/decision/pkg/github"
-
 	"github.com/slack-go/slack"
 )
 
@@ -29,7 +27,7 @@ func handleSlash(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	r.Body = ioutil.NopCloser(io.TeeReader(r.Body, &verifier))
+	r.Body = io.NopCloser(io.TeeReader(r.Body, &verifier))
 	s, err := slack.SlashCommandParse(r)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -108,12 +106,13 @@ func parseFlags() {
 	flag.BoolVar(&decision.CommitAsPRs, "commit-as-prs", false, "Commit decisions as Pull Requests")
 	flag.StringVar(&decision.Token, "slack-token", "", "Your Slack API token starting xoxb-...")
 	flag.StringVar(&signingSecret, "slack-signing-secret", "", "Your Slack signing secret")
-	flag.StringVar(&github.Token, "github-token", "", "Your GitHub access token")
-	flag.StringVar(&github.SourceOwner, "source-owner", "", "The owner / organisation of the repo where decisions will be committed")
-	flag.StringVar(&github.SourceRepo, "source-repo", "", "The repo where decisions will be committed")
-	flag.StringVar(&github.CommitBranch, "branch", "master", "The branch where decisions will be committed")
-	flag.StringVar(&github.AuthorName, "commit-author", "", "The author name to use for commits")
-	flag.StringVar(&github.AuthorEmail, "commit-email", "", "The author email to use for commits")
+	flag.StringVar(&git.ProviderType, "provider", "github", "Your git provider, github or gitlab")
+	flag.StringVar(&git.Token, "provider-token", "", "Your access token for your Git provider")
+	flag.StringVar(&git.SourceOwner, "source-owner", "", "The owner / organisation of the repo where decisions will be committed")
+	flag.StringVar(&git.SourceRepo, "source-repo", "", "The repo where decisions will be committed")
+	flag.StringVar(&git.CommitHeadBranch, "branch", "main", "The branch where decisions will be committed")
+	flag.StringVar(&git.AuthorName, "commit-author", "", "The author name to use for commits")
+	flag.StringVar(&git.AuthorEmail, "commit-email", "", "The author email to use for commits")
 	flag.Parse()
 
 	if decision.Token == "" {
@@ -135,39 +134,39 @@ func parseFlags() {
 		fmt.Printf("Slack Signing Secret: %v\n", redact(signingSecret))
 	}
 
-	if github.Token == "" {
-		fmt.Fprintln(os.Stderr, "missing required argument -github-token")
+	if git.Token == "" {
+		fmt.Fprintln(os.Stderr, "missing required argument -provider-token")
 		os.Exit(2)
 	} else {
-		fmt.Printf("Github Token: %v\n", redact(github.Token))
+		fmt.Printf("Github Token: %v\n", redact(git.Token))
 	}
 
-	if github.SourceOwner == "" {
+	if git.SourceOwner == "" {
 		fmt.Fprintln(os.Stderr, "missing required argument -source-owner")
 		os.Exit(2)
 	} else {
-		fmt.Printf("Source Owner: %v\n", redact(github.SourceOwner))
+		fmt.Printf("Source Owner: %v\n", redact(git.SourceOwner))
 	}
 
-	if github.SourceRepo == "" {
+	if git.SourceRepo == "" {
 		fmt.Fprintln(os.Stderr, "missing required argument -source-repo")
 		os.Exit(2)
 	} else {
-		fmt.Printf("Source Repo: %v\n", redact(github.SourceRepo))
+		fmt.Printf("Source Repo: %v\n", redact(git.SourceRepo))
 	}
 
-	if github.AuthorName == "" {
+	if git.AuthorName == "" {
 		fmt.Fprintln(os.Stderr, "missing required argument -commit-author")
 		os.Exit(2)
 	} else {
-		fmt.Printf("Commit Author: %v\n", redact(github.AuthorName))
+		fmt.Printf("Commit Author: %v\n", redact(git.AuthorName))
 	}
 
-	if github.AuthorEmail == "" {
+	if git.AuthorEmail == "" {
 		fmt.Fprintln(os.Stderr, "missing required argument -commit-email")
 		os.Exit(2)
 	} else {
-		fmt.Printf("Commit Email: %v\n", redact(github.AuthorEmail))
+		fmt.Printf("Commit Email: %v\n", redact(git.AuthorEmail))
 	}
 }
 

@@ -1,4 +1,4 @@
-FROM golang:1.13.7 AS builder
+FROM golang:1.19 AS builder
 WORKDIR /go/src/github.com/evnsio/decision/
 COPY ./ .
 ENV GOOS=linux

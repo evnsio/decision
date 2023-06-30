@@ -56,4 +56,5 @@ Date: {{.Date}}
 
 ## Consequences
 
-{{.Consequences}}`
+{{.Consequences}}
+`
